@@ -1,0 +1,13 @@
+{
+  "name": "romkalender-kulturskolen",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node test/volt.test.mjs && node --experimental-strip-types test/fn.test.mjs"
+  },
+  "dependencies": {
+    "@netlify/functions": "^6.1.2",
+    "ical-expander": "^3.2.0"
+  },
+  "type": "module",
+  "private": true
+}
