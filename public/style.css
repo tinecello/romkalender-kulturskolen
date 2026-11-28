@@ -116,3 +116,20 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--magenta);outline
 .roomtag.volt{color:#4A4A55}
 .mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
 .mrow:last-child{border-bottom:0}
+
+/* Administrer brukere */
+dialog.wide{max-width:720px}
+.addbox{display:flex;flex-direction:column;gap:12px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:16px}
+.checks{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+.checks .btn{margin-left:auto}
+label.check{flex-direction:row;align-items:center;gap:8px;font-weight:600;min-height:44px}
+label.check input{width:20px;height:20px;padding:0;accent-color:var(--magenta)}
+.adminhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.adminhead input{flex:1;max-width:280px}
+.memberlist{max-height:50vh;overflow-y:auto;border-top:1px solid var(--line)}
+.urow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.urow .who2{min-width:0}
+.urow .who2 div{overflow-wrap:anywhere}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.tag{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;line-height:16px}
+.tag.add{background:#fff;border:1.5px dashed var(--dash);color:var(--burg);cursor:pointer;font:inherit;font-size:12px;font-weight:600}

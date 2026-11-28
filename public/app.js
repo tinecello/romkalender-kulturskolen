@@ -281,6 +281,10 @@ async function onSession(session) {
   $("btnLogin").hidden = !!state.user;
   $("btnLogout").hidden = !state.user;
   $("btnMine").hidden = !state.user;
+  // Admin-knappen vises bare hvis databasen godtar admin-kallet (kun Tine).
+  state.admin = false;
+  if (state.user) { const { error } = await sb.rpc("elefantrommet_list_members"); state.admin = !error; }
+  $("btnAdmin").hidden = !state.admin;
   await loadMine();
   render();
 }
@@ -304,6 +308,96 @@ function renderMine() {
   });
 }
 $("btnMine").onclick = () => { renderMine(); $("dlgMine").showModal(); };
+
+// ---------- Administrer brukere ----------
+const MEMBER_ROOMS = ["elefantrommet", "glassrommet"];
+const ROOM_NAMES = { elefantrommet: "Elefantrommet", glassrommet: "Glassrommet" };
+const ADMIN_EMAIL = "tjohnsgaard@gmail.com";
+let members = [];
+
+async function loadMembers() {
+  const map = new Map();
+  for (const id of MEMBER_ROOMS) {
+    const { data, error } = await sb.rpc(`${id}_list_members`);
+    if (error) throw error;
+    (data || []).forEach((m) => {
+      const u = map.get(m.email) || { email: m.email, name: m.display_name, rooms: [] };
+      u.rooms.push(id); map.set(m.email, u);
+    });
+  }
+  members = [...map.values()].sort((a, b) => a.name.localeCompare(b.name, "nb") || a.email.localeCompare(b.email));
+}
+
+function renderMembers() {
+  const q = $("memberSearch").value.trim().toLowerCase();
+  const list = members.filter((u) => !q || u.name.toLowerCase().includes(q) || u.email.includes(q));
+  $("memberCount").textContent = `Brukere (${members.length})`;
+  const box = $("memberList");
+  if (!list.length) { box.innerHTML = `<p class="muted" style="padding:12px 0">Ingen treff.</p>`; return; }
+  box.innerHTML = list.map((u) => {
+    const tags = MEMBER_ROOMS.map((id) => u.rooms.includes(id)
+      ? `<span class="tag" style="background:${ROOMS[id].tint};color:${ROOMS[id].ink}">${ROOM_NAMES[id]}</span>`
+      : `<button class="tag add" data-grant="${esc(u.email)}" data-room="${id}">+ ${ROOM_NAMES[id]}</button>`).join("");
+    const rm = u.email === ADMIN_EMAIL ? `<span class="small muted">Administrator</span>` : `<button class="btn ghost sm" data-rm="${esc(u.email)}">Fjern</button>`;
+    return `<div class="urow"><div class="who2"><div style="font-weight:700">${esc(u.name)}</div><div class="small muted">${esc(u.email)}</div><div class="tags">${tags}</div></div>${rm}</div>`;
+  }).join("");
+  box.querySelectorAll("[data-grant]").forEach((b) => b.onclick = async () => {
+    const u = members.find((m) => m.email === b.dataset.grant);
+    b.disabled = true;
+    const { error } = await sb.rpc(`${b.dataset.room}_add_member`, { p_email: u.email, p_name: u.name });
+    if (error) { b.disabled = false; b.textContent = "Prøv igjen"; return; }
+    await refreshMembers();
+  });
+  box.querySelectorAll("[data-rm]").forEach((b) => b.onclick = async () => {
+    if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Bekreft – fjern fra begge rom"; return; }
+    b.disabled = true;
+    const u = members.find((m) => m.email === b.dataset.rm);
+    for (const id of u.rooms) {
+      const { error } = await sb.rpc(`${id}_remove_member`, { p_email: u.email });
+      if (error) { b.disabled = false; b.textContent = "Prøv igjen"; return; }
+    }
+    await refreshMembers();
+  });
+}
+
+async function refreshMembers() {
+  try { await loadMembers(); renderMembers(); }
+  catch { $("memberList").innerHTML = `<p class="msg bad" style="padding:12px 0">Fikk ikke hentet brukerlisten. Logg inn på nytt og prøv igjen.</p>`; }
+}
+
+$("btnAdmin").onclick = async () => {
+  $("addMsg").textContent = ""; $("memberSearch").value = "";
+  $("memberList").innerHTML = `<p class="muted" style="padding:12px 0">Henter brukere …</p>`;
+  $("dlgAdmin").showModal();
+  await refreshMembers();
+};
+$("memberSearch").oninput = renderMembers;
+
+$("formAdd").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const f = ev.target, msg = $("addMsg");
+  const name = f.fullname.value.trim(), email = f.email.value.trim().toLowerCase();
+  const rooms = MEMBER_ROOMS.filter((id) => f[id].checked);
+  msg.className = "msg bad";
+  if (!rooms.length) { msg.textContent = "Velg minst ett rom."; return; }
+  const btn = f.querySelector("[type=submit]"); btn.disabled = true;
+  const added = [], already = [];
+  for (const id of rooms) {
+    const { data, error } = await sb.rpc(`${id}_add_member`, { p_email: email, p_name: name });
+    if (error) {
+      btn.disabled = false;
+      msg.textContent = error.code === "22023" ? "Sjekk navn og e-postadresse." : "Brukeren ble ikke lagt til. Prøv igjen.";
+      await refreshMembers(); return;
+    }
+    (data ? added : already).push(ROOM_NAMES[id]);
+  }
+  btn.disabled = false;
+  msg.className = "msg good";
+  msg.textContent = (added.length ? `${name} er lagt til i ${added.join(" og ")}.` : "")
+    + (already.length ? ` Var allerede registrert i ${already.join(" og ")}.` : "");
+  f.fullname.value = ""; f.email.value = "";
+  await refreshMembers();
+});
 
 // ---------- Navigasjon ----------
 document.querySelectorAll("[data-close]").forEach((b) => b.onclick = () => b.closest("dialog").close());

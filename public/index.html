@@ -18,6 +18,7 @@
     <div class="who">
       <span id="whoName" class="muted"></span>
       <button id="btnMine" class="btn ghost" hidden>Dine bookinger</button>
+      <button id="btnAdmin" class="btn ghost" hidden>Administrer brukere</button>
       <button id="btnLogin" class="btn ghost">Logg inn</button>
       <button id="btnLogout" class="btn link" hidden>Logg ut</button>
     </div>
@@ -116,6 +117,28 @@
   <div class="dlg">
     <div class="dlg-head"><h2>Dine bookinger</h2><button type="button" class="icon" data-close aria-label="Lukk">✕</button></div>
     <div id="mineList"></div>
+  </div>
+</dialog>
+
+<!-- Administrer brukere (kun admin) -->
+<dialog id="dlgAdmin" class="wide">
+  <div class="dlg">
+    <div class="dlg-head"><h2>Administrer brukere</h2><button type="button" class="icon" data-close aria-label="Lukk">✕</button></div>
+    <form id="formAdd" class="addbox">
+      <h3>Legg til bruker</h3>
+      <div class="row2">
+        <label>Navn<input type="text" name="fullname" maxlength="60" required placeholder="Slik navnet vises på bookinger"></label>
+        <label>E-post<input type="email" name="email" required placeholder="navn@lorenskog.kommune.no"></label>
+      </div>
+      <div class="checks">
+        <label class="check"><input type="checkbox" name="elefantrommet" checked>Elefantrommet</label>
+        <label class="check"><input type="checkbox" name="glassrommet" checked>Glassrommet</label>
+        <button type="submit" class="btn primary">Legg til</button>
+      </div>
+      <p class="msg" id="addMsg"></p>
+    </form>
+    <div class="adminhead"><h3 id="memberCount">Brukere</h3><input type="search" id="memberSearch" placeholder="Søk navn eller e-post" aria-label="Søk i brukere"></div>
+    <div id="memberList" class="memberlist"></div>
   </div>
 </dialog>
 
