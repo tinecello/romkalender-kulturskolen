@@ -266,7 +266,9 @@ $("formLogin").addEventListener("submit", async (ev) => {
   const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + "/" } });
   btn.disabled = false;
   msg.className = error ? "msg bad" : "msg good";
-  msg.textContent = error ? "Kunne ikke sende lenken. Sjekk e-postadressen og prøv igjen." : "Sjekk innboksen din og trykk på lenken.";
+  msg.textContent = !error ? "Sjekk innboksen din (og søppelpost) og trykk på lenken. Bare den nyeste lenken virker."
+    : error.status === 429 ? "Lenken er allerede sendt – sjekk innboksen. Vil du ha en ny, vent ett minutt."
+    : "Kunne ikke sende lenken. Sjekk e-postadressen og prøv igjen.";
 });
 
 async function onSession(session) {
