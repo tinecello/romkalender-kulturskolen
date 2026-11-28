@@ -102,7 +102,7 @@ const lockSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" str
 
 function roomNote(room) {
   const cfg = ROOMS[room.id];
-  if (room.status === "pending") return "Venter på SpeedAdmin – viser ingen tider ennå";
+  if (room.status === "pending") return "KOMMER";
   if (room.status === "error") return "Kunne ikke hente kalenderen akkurat nå";
   return cfg.note;
 }
@@ -146,7 +146,7 @@ function render() {
       const l = Math.max(0, (s - 8) / 12 * 100), w = Math.max(1, (Math.min(20, en) - Math.max(8, s)) / 12 * 100);
       return `<i style="left:${l}%;width:${w}%;background:${e.mine ? cfg.color : room.id === "volt" ? "#B9B8C2" : cfg.color + "66"}"></i>`;
     }).join("");
-    const sum = room.status === "pending" ? "Venter på SpeedAdmin" : c.evs.length
+    const sum = room.status === "pending" ? "KOMMER" : c.evs.length
       ? "Opptatt " + c.evs.map((e) => (e.allDay ? "hele dagen" : `${hm(e.start)}–${hm(e.end)}`) + (e.mine ? " (din booking)" : "")).join(", ")
       : "Ledig hele dagen";
     let btn = "";
