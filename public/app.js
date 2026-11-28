@@ -271,6 +271,39 @@ $("formLogin").addEventListener("submit", async (ev) => {
     : "Kunne ikke sende lenken. Sjekk e-postadressen og prøv igjen.";
 });
 
+// E-postlenken har med seg token_hash (samme e-postmal som de gamle sidene).
+// Innloggingen fullføres først når man trykker på knappen, slik at e-postskannere ikke bruker opp lenken.
+const linkParams = (() => {
+  const p = new URLSearchParams(location.search);
+  new URLSearchParams(location.hash.slice(1)).forEach((v, k) => { if (!p.has(k)) p.set(k, v); });
+  return p;
+})();
+function cleanUrl() { history.replaceState(null, "", location.pathname); }
+if (linkParams.get("token_hash")) {
+  $("finishMsg").textContent = "";
+  $("dlgFinish").showModal();
+} else if (linkParams.get("error_description")) {
+  cleanUrl();
+  $("loginMsg").className = "msg bad";
+  openLogin();
+  $("loginMsg").textContent = "Innloggingslenken var utløpt eller allerede brukt. Be om en ny lenke.";
+}
+$("btnFinish").onclick = async () => {
+  const btn = $("btnFinish"), msg = $("finishMsg");
+  btn.disabled = true;
+  const { error } = await sb.auth.verifyOtp({ token_hash: linkParams.get("token_hash"), type: linkParams.get("type") || "email" });
+  btn.disabled = false;
+  cleanUrl();
+  if (error) {
+    msg.className = "msg bad";
+    msg.textContent = "Lenken er utløpt eller allerede brukt. Be om en ny lenke – bare den nyeste virker.";
+    btn.hidden = true; $("btnFinishNew").hidden = false;
+    return;
+  }
+  $("dlgFinish").close();
+};
+$("btnFinishNew").onclick = () => { $("dlgFinish").close(); openLogin(); };
+
 async function onSession(session) {
   state.user = session?.user || null;
   state.name = "";

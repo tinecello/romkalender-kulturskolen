@@ -73,6 +73,19 @@
   </form>
 </dialog>
 
+<!-- Fullfør innlogging (fra e-postlenken) -->
+<dialog id="dlgFinish">
+  <div class="dlg">
+    <div class="dlg-head"><h2>Fullfør innlogging</h2><button type="button" class="icon" data-close aria-label="Lukk">✕</button></div>
+    <p class="muted">Trykk på knappen for å logge inn på romkalenderen.</p>
+    <p class="msg" id="finishMsg"></p>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="btnFinishNew" hidden>Send ny lenke</button>
+      <button type="button" class="btn primary" id="btnFinish">Fullfør innlogging</button>
+    </div>
+  </div>
+</dialog>
+
 <!-- Booking -->
 <dialog id="dlgBook">
   <form method="dialog" class="dlg" id="formBook">
